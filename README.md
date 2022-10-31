@@ -1,5 +1,7 @@
 **wgambling-user-edit**
 
+Download: https://github.com/jacobgithub/wgambling-user-edit/releases/tag/release
+
 This is a user edit of the Wanderer's Gambling Addon for World of Warcraft, which I found here, https://addonswow.com/wanderers-gambling.
 
 Updated for interface version 100000.
