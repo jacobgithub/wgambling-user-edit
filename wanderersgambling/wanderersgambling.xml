@@ -1,0 +1,466 @@
+﻿<Ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file="wanderersgambling.lua" />
+
+	<!-- <AnimationGroup> (creates an AnimationGroup widget) encloses <Animation> tags. -->
+	<AnimationGroup>
+		<Animation />
+		<Scripts />
+	</AnimationGroup>
+	<!-- font used for the list buttons and totals -->
+	<Font name="WanderersGamblingFont" inherits="NumberFont_Shadow_Med" virtual="true">
+		<Color r="1.0" g="1.0" b="0" a="1.0" />
+	</Font>
+	<!-- template for the three buttons across the bottom: reset, update and play/pause -->
+	<Button name="WanderersGamblingButtonTemplate" virtual="true">
+		<Layers>
+			<Layer level="BACKGROUND">
+				<!-- background stripe behind whole row -->
+				<Texture parentKey="Stripe">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="1" y="0"/>
+						<Anchor point="BOTTOMRIGHT" x="-1" y="0"/>
+					</Anchors>
+					<Color r="1" g="1" b="1" a="0.06"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<ButtonText parentKey="Text">
+			<Anchors>
+				<Anchor point="CENTER" x="0" y="-1"/>
+			</Anchors>
+		</ButtonText>
+		<NormalFont style="GameFontNormalSmall"/>
+		<HighlightTexture alphaMode="ADD">
+			<Color r=".2" g=".5" b="1" a="0.25"/>
+		</HighlightTexture>
+	</Button>
+
+	<Frame name="WanderersGambling_Frame" parent="UIParent" toplevel="true" movable="true" enableMouse="true" clampedToScreen="true">
+		<Size>
+			<AbsDimension x="320" y="160" />
+		</Size>
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="UIParent" />
+		</Anchors>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<!-- WidthTest is never shown, only used for testing GetStringWidth -->
+				<FontString parentKey="WidthTest" inherits="WanderersGamblingFont" hidden="true" />
+				<!-- streaks below list near bottom of window -->
+				<Texture file="Interface\FrameGeneral\UI-Background-Marble" horizTile="true" vertTile="true">
+					<Anchors>
+						<!-- background dark marble texture -->
+						<Anchor point="TOPLEFT" x="1" y="-1" />
+						<Anchor point="BOTTOMRIGHT" x="-1" y="1" />
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER">
+				<Texture inherits="UI-Frame-InnerTopLeft">
+					<Anchors>
+						<!-- topleft corner inset -->
+						<Anchor point="TOPLEFT" />
+					</Anchors>
+				</Texture>
+				<Texture inherits="UI-Frame-InnerTopRight">
+					<Anchors>
+						<!-- topright corner inset -->
+						<Anchor point="TOPRIGHT" />
+					</Anchors>
+				</Texture>
+				<Texture inherits="UI-Frame-InnerBotLeftCorner">
+					<Anchors>
+						<!-- bottomleft corner inset -->
+						<Anchor point="BOTTOMLEFT" />
+					</Anchors>
+				</Texture>
+				<Texture inherits="UI-Frame-InnerBotRight">
+					<Anchors>
+						<!-- bottomright corner inset -->
+						<Anchor point="BOTTOMRIGHT" />
+					</Anchors>
+				</Texture>
+				<Texture inherits="_UI-Frame-InnerTopTile">
+					<Anchors>
+						<!-- across top inset -->
+						<Anchor point="TOPLEFT" x="6" />
+						<Anchor point="TOPRIGHT" x="-6" />
+					</Anchors>
+				</Texture>
+				<Texture inherits="_UI-Frame-InnerBotTile">
+					<Anchors>
+						<!-- across bottom inset -->
+						<Anchor point="BOTTOMLEFT" x="6" />
+						<Anchor point="BOTTOMRIGHT" x="-6" />
+					</Anchors>
+				</Texture>
+				<Texture inherits="!UI-Frame-InnerLeftTile">
+					<Anchors>
+						<!-- down left inset -->
+						<Anchor point="TOPLEFT" y="-6" />
+						<Anchor point="BOTTOMLEFT" y="6" />
+					</Anchors>
+				</Texture>
+				<Texture inherits="!UI-Frame-InnerRightTile">
+					<Anchors>
+						<!-- down right inset -->
+						<Anchor point="TOPRIGHT" y="-6" />
+						<Anchor point="BOTTOMRIGHT" x="6" />
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="Wanderers Gambling" inherits="GameFontNormal" text="Wanderers Gambling">
+					<Size x="300" y="20" />
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="10" y="-15" />
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="version" inherits="GameFontNormal" text="|cffff3f3f(420.69 version)"> 
+					<Size x="300" y="20" />
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="10" y="-35" />
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString inherits="GameFontNormal" text="Created by Nyellâ@Area 52">
+					<Size x="200" y="20" />
+					<Anchors>
+						<Anchor point="BOTTOMLEFT">
+							<Offset x="1" y="25" />
+						</Anchor>
+					</Anchors>
+					<Color r="0.75" g="0.75" b="0.75" />
+				</FontString>
+				<FontString inherits="GameFontNormal" text="Boomur/HKC edit for 10.0">
+					<Size x="200" y="20" />
+					<Anchors>
+						<Anchor point="BOTTOMLEFT">
+							<Offset x="1" y="5" />
+						</Anchor>
+					</Anchors>
+					<Color r="0.75" g="0.75" b="0.75" />
+				</FontString>
+			</Layer>
+		</Layers>
+
+		<Frames>
+			<Button name="WanderersGambling_Close" inherits="UIPanelCloseButton">
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="WanderersGambling_Frame" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="7" y="6" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						WanderersGambling_HideWindow();
+					</OnClick>
+				</Scripts>
+			</Button>
+
+			<!--Left Side!-->
+			<Button name="WanderersGambling_AcceptOnes_Button" inherits="WanderersGamblingButtonTemplate" text="Open Entry">
+				<Size x="80" y="21" />
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="5" y="-20" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						WanderersGambling_OnClickACCEPTONES();
+
+					</OnClick>
+				</Scripts>
+			</Button>
+
+			<Button name="WanderersGambling_LASTCALL_Button" inherits="WanderersGamblingButtonTemplate" movable="true" text="Last Call">
+				<Size x="80" y="21" />
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="5" y="-40" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						WanderersGambling_OnClickLASTCALL();
+					</OnClick>
+				</Scripts>
+			</Button>
+
+			<Button name="WanderersGambling_ROLL_Button" inherits="WanderersGamblingButtonTemplate" movable="true" text="Roll!">
+				<Size x="80" y="21" />
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="5" y="-60" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						WanderersGambling_OnClickROLL();
+					</OnClick>
+				</Scripts>
+			</Button>
+
+			<Button name="WanderersGambling_Ban_Button" inherits="WanderersGamblingButtonTemplate" text="Ban List">
+				<Size x="80" y="21" />
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="5" y="-80" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						WanderersGambling_ListBan();
+
+					</OnClick>
+					<OnLoad>WanderersGambling_Ban_Button.tooltipText="Ban list, to add people here type /cg ban (name)"</OnLoad>
+
+				</Scripts>
+			</Button>
+
+			<!--Right Side!-->
+			<Button name="WanderersGambling_Roll_Button" inherits="WanderersGamblingButtonTemplate" text="User Roll">
+				<Size x="80" y="21" />
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="-5" y="-20" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						WanderersGambling_OnClickRollUser();
+
+					</OnClick>
+					<OnLoad>WanderersGambling_Roll_Button.tooltipText="Does /roll for you!"</OnLoad>
+				</Scripts>
+			</Button>
+
+			<Button name="WanderersGambling_Type_Button" inherits="WanderersGamblingButtonTemplate" text="Enter">
+				<Size x="80" y="21" />
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="-5" y="-40" />
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						WanderersGambling_OnClickRoll1();
+
+					</OnClick>
+					<OnLoad>WanderersGambling_Type_Button.tooltipText="Type's the number one into chat"</OnLoad>
+				</Scripts>
+			</Button>
+
+			<Button name="WanderersGambling_STATS_Button" inherits="WanderersGamblingButtonTemplate" movable="true" text="Stats">
+				<Size x="80" y="21" />
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="-5" y="-60" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						WanderersGambling_OnClickSTATS();
+					</OnClick>
+					<OnLoad>WanderersGambling_STATS_Button.tooltipText="Show's all user stats."</OnLoad>
+				</Scripts>
+			</Button>
+
+			<Button name="WanderersGambling_RESET_Button" inherits="WanderersGamblingButtonTemplate" movable="true" text="Reset Stats">
+				<Size x="80" y="21" />
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="-5" y="-80" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						WanderersGambling_ResetStats()
+					</OnClick>
+					<OnLoad>WanderersGambling_RESET_Button.tooltipText="Resets all Stats"</OnLoad>
+				</Scripts>
+			</Button>
+			
+			<!--Middle!-->
+			<EditBox name="WanderersGambling_EditBox" letters="6">
+				<Size>
+					<AbsDimension x="100" y="30" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOP">
+						<Offset x="2" y="-81" />
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="Texture2" file="Interface\ChatFrame\UI-ChatInputBorder-Right">
+							<Size>
+								<AbsDimension x="75" y="32" />
+							</Size>
+							<Anchors>
+								<Anchor point="RIGHT">
+									<Offset x="9" />
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.7" right="1" top="0" bottom="1" />
+						</Texture>
+						<Texture name="Texture1" file="Interface\ChatFrame\UI-ChatInputBorder-Left">
+							<Size>
+								<AbsDimension x="75" y="32" />
+							</Size>
+							<Anchors>
+								<Anchor point="LEFT">
+									<Offset x="-14" />
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0" right="0.2" top="0" bottom="1" />
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+            WanderersGambling_EditBox_OnLoad();
+          </OnLoad>
+					<OnEscapePressed>
+						self:ClearFocus();
+					</OnEscapePressed>
+				</Scripts>
+				<FontString inherits="ChatFontNormal" />
+			</EditBox>
+
+			<Button name="WanderersGambling_CHAT_Button" inherits="WanderersGamblingButtonTemplate" text="(Raid)">
+				<Size x="80" y="21" />
+				<Anchors>
+					<Anchor point="TOP">
+						<Offset x="1" y="-60" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+
+					<OnClick>
+						WanderersGambling_OnClickCHAT();
+					</OnClick>
+					<OnLoad>WanderersGambling_CHAT_Button.tooltipText="Change Channels"</OnLoad>
+				</Scripts>
+			</Button>
+
+			<Button name="WanderersGambling_RESET1_Button" inherits="WanderersGamblingButtonTemplate" movable="true" text="Reset Game">
+				<Size x="80" y="21" />
+				<Anchors>
+					<Anchor point="BOTTOMRight">
+						<Offset x="-5" y="10" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						WanderersGambling_Reset()
+						WanderersGambling_ResetCmd()
+					</OnClick>
+					<OnLoad>WanderersGambling_RESET1_Button.tooltipText="Resets The Game"</OnLoad>
+				</Scripts>
+			</Button>
+
+			<Button name="WG_MinimapButton" parent="Minimap" enableMouse="true" movable="true" hidden="false">
+				<Size>
+					<AbsDimension x="33" y="33" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" />
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="WG_MinimapButton_Icon" file="Interface\AddOns\WanderersGambling\media\icon">
+							<Size>
+								<AbsDimension x="21" y="21" />
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT">
+									<Offset>
+										<AbsDimension x="7" y="-6" />
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</Texture>
+					</Layer>
+					<Layer level="OVERLAY">
+						<Texture file="Interface\Minimap\MiniMap-TrackingBorder">
+							<Size>
+								<AbsDimension x="56" y="56" />
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" />
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Frames>
+					<Frame name="WG_MinimapButton_DraggingFrame" hidden="true">
+						<Scripts>
+							<OnUpdate>
+						WG_MinimapButton_DraggingFrame_OnUpdate()
+					</OnUpdate>
+						</Scripts>
+					</Frame>
+				</Frames>
+				<HighlightTexture alphaMode="ADD" file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight" />
+				<Scripts>
+					<OnLoad>
+					self:RegisterForClicks("LeftButtonUp","RightButtonUp")
+					self:RegisterForDrag("LeftButton","RightButton")
+				</OnLoad>
+					<OnDragStart>
+					self:LockHighlight()
+					WG_MinimapButton_DraggingFrame:Show()
+				</OnDragStart>
+					<OnDragStop>
+					self:UnlockHighlight()
+					WG_MinimapButton_DraggingFrame:Hide()
+				</OnDragStop>
+					<OnMouseDown>
+					if button == "RightButton" and not self.isMoving then
+					self:StartMoving();
+					self.isMoving = true;
+					end
+				</OnMouseDown>
+					<OnMouseUp>
+					if button == "RightButton" and self.isMoving then
+					self:StopMovingOrSizing();
+					self.isMoving = false;
+					end
+				</OnMouseUp>
+					<OnHide>
+					if ( self.isMoving ) then
+					self:StopMovingOrSizing();
+					self.isMoving = false;
+					end
+				</OnHide>
+					<OnClick>
+					ToggleFrame(WanderersGambling_Frame)
+				</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				WanderersGambling_OnLoad(self);
+			</OnLoad>
+			<OnEvent>
+				WanderersGambling_OnEvent(self, event, ...);
+			</OnEvent>
+			<OnDragStart>
+				self:StartMoving();
+				self.isMoving = true;
+			</OnDragStart>
+			<OnDragStop>
+				self:StopMovingOrSizing();
+				self.isMoving = false;
+			</OnDragStop>
+		</Scripts>
+	</Frame>
+</Ui>
