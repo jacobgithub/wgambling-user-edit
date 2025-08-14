@@ -1,4 +1,4 @@
-﻿local AcceptOnes = "false";
+local AcceptOnes = "false";
 local AcceptRolls = "false";
 local AcceptLoserAmount = "false";
 local totalrolls = 0
@@ -19,6 +19,7 @@ local totalentries = 0;
 local highplayername = "";
 local lowplayername = "";
 local rollCmd = SLASH_RANDOM1:upper();
+local playerLanguageID = 7;
 
 
 -- LOAD FUNCTION --
@@ -42,7 +43,7 @@ local EventFrame=CreateFrame("Frame");
 EventFrame:RegisterEvent("CHAT_MSG_WHISPER");-- Need to register an event to receive it
 EventFrame:SetScript("OnEvent",function(self,event,msg,sender)
     if msg:lower():find("!stats") then--    We're making sure the command is case insensitive by casting it to lowercase before running a pattern check
-        --SendChatMessage("Work in Progress","WHISPER",nil,sender);
+        --C_ChatInfo.SendChatMessage("Work in Progress","WHISPER",nil,sender);
 		WanderersGambling_MessageStats(sender);
     end
 end);
@@ -84,17 +85,17 @@ function WanderersGambling_MessageStats(sender)
 	for i = 0, n - 1 do
 		sortsign = "gave you";
 		if(sortlistamount[i] < 0) then sortsign = "took"; end
-		SendChatMessage(string.format("%s.  %s %s %s total", BreakUpLargeNumbers(i+1), sortlistname[i], sortsign, BreakUpLargeNumbers(math.abs(sortlistamount[i]))), "WHISPER", nil, sender);
+		C_ChatInfo.SendChatMessage(string.format("%s.  %s %s %s total", BreakUpLargeNumbers(i+1), sortlistname[i], sortsign, BreakUpLargeNumbers(math.abs(sortlistamount[i]))), "WHISPER", nil, sender);
 	end
 
 	if (total ~= 0) then
 		sortsign = "won";
 		if(total < 0) then sortsign = "lost" end
-		SendChatMessage(string.format("You have %s %s total.", sortsign, BreakUpLargeNumbers(total)), "WHISPER", nil, sender);
+		C_ChatInfo.SendChatMessage(string.format("You have %s %s total.", sortsign, BreakUpLargeNumbers(total)), "WHISPER", nil, sender);
 	end
 	
 	if (house > 0) then
-		SendChatMessage(string.format("You have paid the house %s total.", BreakUpLargeNumbers(house)), "WHISPER", nil, sender);
+		C_ChatInfo.SendChatMessage(string.format("You have paid the house %s total.", BreakUpLargeNumbers(house)), "WHISPER", nil, sender);
 	end
 end
 
@@ -266,7 +267,7 @@ function WanderersGambling_OnEvent(self, event, ...)
 						WanderersGambling_AcceptOnes_Button:SetText("Open Entry");
 					end
 				else
-					SendChatMessage("Sorry, but you're banned from the game!", chatmethod);
+					C_ChatInfo.SendChatMessage("Sorry, but you're banned from the game!", chatmethod);
 				end
 			elseif(arg1 == "-1") then
 				WanderersGambling_Remove(tostring(arg2));
@@ -285,7 +286,7 @@ function WanderersGambling_OnEvent(self, event, ...)
 				if (key == "!amount" and tonumber(amount)) then
 					WanderersGambling_EditBox:SetText(tonumber(amount));
 					WanderersGambling["lastroll"] = tonumber(amount);
-					SendChatMessage(string.format("%s set next gamble amount to %s.", AcceptLoserAmount, BreakUpLargeNumbers(tonumber(amount))), chatmethod);
+					C_ChatInfo.SendChatMessage(string.format("%s set next gamble amount to %s.", AcceptLoserAmount, BreakUpLargeNumbers(tonumber(amount))), chatmethod);
 					AcceptLoserAmount = "false";
 				end
 			end
@@ -453,11 +454,11 @@ function WanderersGambling_OnClickSTATS()
 	for i = 0, n - 1 do
 		sortsign = "won";
 		if(sortlistamount[i] < 0) then sortsign = "lost"; end
-		SendChatMessage(string.format("%d.  %s %s %s total.", i+1, sortlistname[i], sortsign, BreakUpLargeNumbers(math.abs(sortlistamount[i]))), chatmethod);
+		C_ChatInfo.SendChatMessage(string.format("%d.  %s %s %s total.", i+1, sortlistname[i], sortsign, BreakUpLargeNumbers(math.abs(sortlistamount[i]))), chatmethod);
 	end
 	
 	if (WanderersGambling["house"] > 0) then
-		SendChatMessage(string.format("The house has taken %s total.", BreakUpLargeNumbers(WanderersGambling["house"])), chatmethod);
+		C_ChatInfo.SendChatMessage(string.format("The house has taken %s total.", BreakUpLargeNumbers(WanderersGambling["house"])), chatmethod);
 	end
 end
 
@@ -473,16 +474,16 @@ function WanderersGambling_OnClickROLL()
 		AcceptOnes = "false";
 		AcceptRolls = "true";
 		if (tie == 0) then
-			SendChatMessage("Roll now!",chatmethod,GetDefaultLanguage("player"));
+			C_ChatInfo.SendChatMessage("Roll now!",chatmethod,playerLanguageID);
 		end
 
 		if (lowbreak == 1) then
-			SendChatMessage(format("%s%d%s", "Low end tiebreaker! Roll 1-", theMax, " now!"),chatmethod,GetDefaultLanguage("player"));
+			C_ChatInfo.SendChatMessage(format("%s%d%s", "Low end tiebreaker! Roll 1-", theMax, " now!"),chatmethod,playerLanguageID);
 			WanderersGambling_List();
 		end
 
 		if (highbreak == 1) then
-			SendChatMessage(format("%s%d%s", "High end tiebreaker! Roll 1-", theMax, " now!"),chatmethod,GetDefaultLanguage("player"));
+			C_ChatInfo.SendChatMessage(format("%s%d%s", "High end tiebreaker! Roll 1-", theMax, " now!"),chatmethod,playerLanguageID);
 			WanderersGambling_List();
 		end
 
@@ -491,7 +492,7 @@ function WanderersGambling_OnClickROLL()
 	end
 
 	if (AcceptOnes == "true" and totalrolls <1) then
-		SendChatMessage("Not enough Players!",chatmethod,GetDefaultLanguage("player"));
+		C_ChatInfo.SendChatMessage("Not enough Players!",chatmethod,playerLanguageID);
 	end
 end
 
@@ -502,7 +503,7 @@ function WanderersGambling_TableLength(T)
 end
 
 function WanderersGambling_OnClickLASTCALL()
-	SendChatMessage("Last Call to join!",chatmethod,GetDefaultLanguage("player"));
+	C_ChatInfo.SendChatMessage("Last Call to join!",chatmethod,playerLanguageID);
 	WanderersGambling_EditBox:ClearFocus();
 	WanderersGambling_LASTCALL_Button:Disable();
 	WanderersGambling_ROLL_Button:Enable();
@@ -523,7 +524,7 @@ function WanderersGambling_OnClickACCEPTONES()
 		local sRandomCommentEnd = ""
 		if amount % 2 > 0 then withdrawComment = "how embarrassing!" sRandomComment = "Focus up for" sRandomCommentEnd = " A product from, Boomur & Sons!"	 end		
 		if amount > 99999 then highRoller = "Let's go High Rollers!" end
-		SendChatMessage(format("%s%s%s%s", sRandomComment.." BronzeKnight's Gambling!"..sRandomCommentEnd.." Rolling for: ", BreakUpLargeNumbers(amount), "!"..highRoller.." Type 1 to join!  (-1 to withdraw, "..withdrawComment..")", fakeroll),chatmethod,GetDefaultLanguage("player"));
+		C_ChatInfo.SendChatMessage(format("%s%s%s%s", sRandomComment.." BronzeKnight's Gambling!"..sRandomCommentEnd.." Rolling for: ", BreakUpLargeNumbers(amount), "!"..highRoller.." Type 1 to join!  (-1 to withdraw, "..withdrawComment..")", fakeroll),chatmethod,playerLanguageID);
         WanderersGambling["lastroll"] = WanderersGambling_EditBox:GetText();
 		theMax = tonumber(WanderersGambling_EditBox:GetText()); 
 		low = theMax+1;
@@ -543,9 +544,9 @@ end
 
 function WanderersGambling_OnClickRoll1()
 	if(WanderersGambling["chat"] == false) then
-		SendChatMessage("1","Guild");
+		C_ChatInfo.SendChatMessage("1","Guild");
 	else
-		SendChatMessage("1","Raid");
+		C_ChatInfo.SendChatMessage("1","Raid");
 	end
 end
 
@@ -604,14 +605,14 @@ function WanderersGambling_Report()
 		
 		table.insert(WanderersGambling["stats"][WanderersGambling["UUID"]], final); --won, lost, owed
 	
-		SendChatMessage(string3,chatmethod,GetDefaultLanguage("player"));
+		C_ChatInfo.SendChatMessage(string3,chatmethod,playerLanguageID);
 		
 		if (WanderersGambling["loser"] == 1) then
-			SendChatMessage(string.format("%s can now set the next gambling amount by saying !amount x", lowname), chatmethod);
+			C_ChatInfo.SendChatMessage(string.format("%s can now set the next gambling amount by saying !amount x", lowname), chatmethod);
 			AcceptLoserAmount = lowname;
 		end
 	else
-		SendChatMessage("It was a tie! No payouts on this roll!",chatmethod,GetDefaultLanguage("player"));
+		C_ChatInfo.SendChatMessage("It was a tie! No payouts on this roll!",chatmethod,playerLanguageID);
 	end
 	WanderersGambling_Reset();
 	WanderersGambling_AcceptOnes_Button:SetText("Open Entry");
@@ -679,13 +680,13 @@ function WanderersGambling_ParseRoll(temp2)
 					if (high == 0) then
 						high = roll
 						if (whispermethod) then
-							SendChatMessage(string.format("You have the HIGHEST roll so far: %s and you might win a max of %sg", roll, (high - 1)),"WHISPER",GetDefaultLanguage("player"),player);
+							C_ChatInfo.SendChatMessage(string.format("You have the HIGHEST roll so far: %s and you might win a max of %sg", roll, (high - 1)),"WHISPER",playerLanguageID,player);
 						end
 					else
 						high = roll
 						if (whispermethod) then
-							SendChatMessage(string.format("You have the HIGHEST roll so far: %s and you might win %sg from %s", roll, (high - low), lowplayername),"WHISPER",GetDefaultLanguage("player"),player);
-							SendChatMessage(string.format("%s now has the HIGHEST roller so far: %s and you might owe him/her %sg", player, roll, (high - low)),"WHISPER",GetDefaultLanguage("player"),lowplayername);
+							C_ChatInfo.SendChatMessage(string.format("You have the HIGHEST roll so far: %s and you might win %sg from %s", roll, (high - low), lowplayername),"WHISPER",playerLanguageID,player);
+							C_ChatInfo.SendChatMessage(string.format("%s now has the HIGHEST roller so far: %s and you might owe him/her %sg", player, roll, (high - low)),"WHISPER",playerLanguageID,lowplayername);
 						end
 					end
 					WanderersGambling.hightie = {};
@@ -703,7 +704,7 @@ function WanderersGambling_ParseRoll(temp2)
 					low = roll
 					if (high ~= low) then
 						if (whispermethod) then
-							SendChatMessage(string.format("You have the LOWEST roll so far: %s and you might owe %s %sg ", roll, highplayername, (high - low)),"WHISPER",GetDefaultLanguage("player"),player);
+							C_ChatInfo.SendChatMessage(string.format("You have the LOWEST roll so far: %s and you might owe %s %sg ", roll, highplayername, (high - low)),"WHISPER",playerLanguageID,player);
 						end
 					end
 					WanderersGambling.lowtie = {};				
@@ -770,7 +771,7 @@ end
 function WanderersGambling_List()
 	for i=1, table.getn(WanderersGambling.strings) do
 	  	local string3 = strjoin(" ", "", tostring(WanderersGambling.strings[i]):gsub("^%l", string.upper),"still needs to roll.")
-		SendChatMessage(string3,chatmethod,GetDefaultLanguage("player"));
+		C_ChatInfo.SendChatMessage(string3,chatmethod,playerLanguageID);
 	end
 end
 
@@ -925,7 +926,7 @@ function WanderersGambling_Reset()
 end
 
 function WanderersGambling_ResetCmd()
-	SendChatMessage("BronzeKnight's Gambling game has been reset!", chatmethod)	
+	C_ChatInfo.SendChatMessage("BronzeKnight's Gambling game has been reset!", chatmethod)	
 end
 
 function WanderersGambling_EditBox_OnLoad()
