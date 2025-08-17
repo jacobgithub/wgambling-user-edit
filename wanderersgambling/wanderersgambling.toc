@@ -1,6 +1,6 @@
 # wanderersgambling - Nyella's gambling addon.
 
-## Interface: 100000
+## Interface: 110200
 
 ## Title:|cffff7d0aWanderersGambling
 ## Author: Nyella
@@ -8,6 +8,6 @@
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## Notes: Lose all your gold.
-## URL: http://wow.curseforge.com/addons/wanderers-gambling/
+## URL: https://github.com/jacobgithub/wgambling-user-edit
 ## SavedVariables: WanderersGambling
 wanderersgambling.xml
