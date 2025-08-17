@@ -19,8 +19,9 @@ local totalentries = 0;
 local highplayername = "";
 local lowplayername = "";
 local rollCmd = SLASH_RANDOM1:upper();
-local playerLanguageID = 7;
-
+local playerFactionString = ""
+local playerLanguageID = 0;
+local lowBall = ""
 
 -- LOAD FUNCTION --
 function WanderersGambling_OnLoad(self)
@@ -34,10 +35,26 @@ function WanderersGambling_OnLoad(self)
 	self:RegisterForDrag("LeftButton");
 
 	WanderersGambling_ROLL_Button:Disable();
-	WanderersGambling_AcceptOnes_Button:Enable();		
+	WanderersGambling_AcceptOnes_Button:Enable();
 	WanderersGambling_LASTCALL_Button:Disable();
 	WanderersGambling_CHAT_Button:Enable();
 end
+
+-- FACTION --
+local function playerFaction()
+	playerFactionString = UnitFactionGroup("player");
+end
+playerFaction()
+
+-- CHAT LANGUAGE --
+local function playerLanguage(playerFactionString)
+	if playerFactionString == "Alliance" then
+		playerLanguageID = 7
+	else
+		playerLanguageID = 1
+	end
+end
+playerLanguage(playerFactionString);
 
 local EventFrame=CreateFrame("Frame");
 EventFrame:RegisterEvent("CHAT_MSG_WHISPER");-- Need to register an event to receive it
@@ -80,7 +97,7 @@ function WanderersGambling_MessageStats(sender)
 	end
 
 	n, sortlistname, sortlistamount = WanderersGambling_SortAndMergeStats(compiledStats);
-	
+
 	local sortsign = "";
 	for i = 0, n - 1 do
 		sortsign = "gave you";
@@ -93,7 +110,7 @@ function WanderersGambling_MessageStats(sender)
 		if(total < 0) then sortsign = "lost" end
 		C_ChatInfo.SendChatMessage(string.format("You have %s %s total.", sortsign, BreakUpLargeNumbers(total)), "WHISPER", nil, sender);
 	end
-	
+
 	if (house > 0) then
 		C_ChatInfo.SendChatMessage(string.format("You have paid the house %s total.", BreakUpLargeNumbers(house)), "WHISPER", nil, sender);
 	end
@@ -143,7 +160,7 @@ function WanderersGambling_SlashCmd(msg)
 		Print("", "", "|cffffff00GCG has now been reset");
 		WanderersGambling_Reset();
 		WanderersGambling_AcceptOnes_Button:SetText("Open Entry");
-		msgPrint = 1;		
+		msgPrint = 1;
 	end
 	if (msg == "resetstats") then
 		Print("", "", "|cffffff00GCG stats have now been reset");
@@ -203,9 +220,9 @@ function WanderersGambling_OnEvent(self, event, ...)
 
 		if(not WanderersGambling) then
 			WanderersGambling = {
-				["active"] = 1, 
-				["chat"] = false, 
-				["whispers"] = false, 
+				["active"] = 1,
+				["chat"] = false,
+				["whispers"] = false,
 				["strings"] = { },
 				["lowtie"] = { },
 				["hightie"] = { },
@@ -213,7 +230,7 @@ function WanderersGambling_OnEvent(self, event, ...)
 				["guildCutPercentage"] = 0.1
 			}
 		end
-		
+
 		if(not WanderersGambling["house"]) then WanderersGambling["house"] = 0; end
 		if(not WanderersGambling["lastroll"]) then WanderersGambling["lastroll"] = 100; end
 		if(not WanderersGambling["stats"]) then WanderersGambling["stats"] = { }; end
@@ -235,7 +252,7 @@ function WanderersGambling_OnEvent(self, event, ...)
 			WanderersGambling_CHAT_Button:SetText("(Raid)");
 			chatmethod = "RAID";
 		end
-		
+
 		if(WanderersGambling["whispers"] == false) then
 
 			whispermethod = false;
@@ -283,10 +300,15 @@ function WanderersGambling_OnEvent(self, event, ...)
 			charname, realmname = strsplit("-", tostring(arg2));
 			if (charname:gsub("^%l", string.upper) == AcceptLoserAmount) then
 				key, amount = strsplit(" ", arg1);
-				if (key == "!amount" and tonumber(amount)) then
+				if (key == "!amount" and tonumber(amount)) then			
 					WanderersGambling_EditBox:SetText(tonumber(amount));
 					WanderersGambling["lastroll"] = tonumber(amount);
-					C_ChatInfo.SendChatMessage(string.format("%s set next gamble amount to %s.", AcceptLoserAmount, BreakUpLargeNumbers(tonumber(amount))), chatmethod);
+					if tonumber(amount) < 9999 then
+						lowBall = " They must be a poor."
+					else
+						lowBall = ""
+					end
+					C_ChatInfo.SendChatMessage(string.format("%s set next gamble amount to %s."..lowBall.."", AcceptLoserAmount, BreakUpLargeNumbers(tonumber(amount))), chatmethod);
 					AcceptLoserAmount = "false";
 				end
 			end
@@ -295,8 +317,8 @@ function WanderersGambling_OnEvent(self, event, ...)
 
 	if (event == "CHAT_MSG_SYSTEM" and AcceptRolls=="true") then
 		local temp1 = tostring(arg1);
-		WanderersGambling_ParseRoll(temp1);		
-	end	
+		WanderersGambling_ParseRoll(temp1);
+	end
 end
 
 
@@ -311,7 +333,7 @@ function WanderersGambling_ToggleLoser()
 		Print("", "", "|cffffff00Loser is no longer able to set next gamble amount.");
 	else
 		WanderersGambling["loser"] = 1
-		Print("", "", "|cffffff00Loser can now set next gamble amount.");		
+		Print("", "", "|cffffff00Loser can now set next gamble amount.");
 	end
 end
 
@@ -322,7 +344,7 @@ function WanderersGambling_ToggleHouse(percent)
 			Print("", "", "|cffffff00Guildbank house cut has been turned off.");
 		else
 			WanderersGambling["isHouseCut"] = 1
-			Print("", "", "|cffffff00Guildbank house cut has been turned on.");		
+			Print("", "", "|cffffff00Guildbank house cut has been turned on.");
 		end
 		return
 	elseif (tonumber(percent) > 0 and tonumber(percent) < 1) then
@@ -338,7 +360,7 @@ function WanderersGambling_OnClickCHAT()
 	if(WanderersGambling["chat"] == nil) then WanderersGambling["chat"] = false; end
 
 	WanderersGambling["chat"] = not WanderersGambling["chat"];
-	
+
 	if(WanderersGambling["chat"] == false) then
 		WanderersGambling_CHAT_Button:SetText("(Guild)");
 		chatmethod = "GUILD";
@@ -352,7 +374,7 @@ function WanderersGambling_OnClickWHISPERS()
 	if(WanderersGambling["whispers"] == nil) then WanderersGambling["whispers"] = false; end
 
 	WanderersGambling["whispers"] = not WanderersGambling["whispers"];
-	
+
 	if(WanderersGambling["whispers"] == false) then
 		WanderersGambling_WHISPER_Button:SetText("(No Whispers)");
 		whispermethod = false;
@@ -396,7 +418,7 @@ function WanderersGambling_SortAndMergeStats(stats)
 	local i, j, k;
 	local sortlistname = {};
 	local sortlistamount = {};
-	
+
 	for i, j in pairs(stats) do
 		local name = i;
 		if(WanderersGambling["joinstats"][strlower(i)] ~= nil) then
@@ -414,7 +436,7 @@ function WanderersGambling_SortAndMergeStats(stats)
 			end
 		end
 	end
-	
+
 	for i = 0, n-1 do
 		for j = i+1, n-1 do
 			if(sortlistamount[j] > sortlistamount[i]) then
@@ -423,7 +445,7 @@ function WanderersGambling_SortAndMergeStats(stats)
 			end
 		end
 	end
-	
+
 	return n, sortlistname, sortlistamount;
 end
 
@@ -449,16 +471,16 @@ function WanderersGambling_OnClickSTATS()
 		return;
 	end
 
-	DEFAULT_CHAT_FRAME:AddMessage("--- WanderersGambling Stats ---", chatmethod);
+	DEFAULT_CHAT_FRAME:AddMessage("--- WanderersGambling Stats ---");
 
 	for i = 0, n - 1 do
 		sortsign = "won";
 		if(sortlistamount[i] < 0) then sortsign = "lost"; end
-		C_ChatInfo.SendChatMessage(string.format("%d.  %s %s %s total.", i+1, sortlistname[i], sortsign, BreakUpLargeNumbers(math.abs(sortlistamount[i]))), chatmethod);
+		C_ChatInfo.SendChatMessage(string.format("%d.  %s %s %s total.", i+1, sortlistname[i], sortsign, BreakUpLargeNumbers(math.abs(sortlistamount[i]))), chatmethod,playerLanguageID);
 	end
-	
+
 	if (WanderersGambling["house"] > 0) then
-		C_ChatInfo.SendChatMessage(string.format("The house has taken %s total.", BreakUpLargeNumbers(WanderersGambling["house"])), chatmethod);
+		C_ChatInfo.SendChatMessage(string.format("The house has taken %s total.", BreakUpLargeNumbers(WanderersGambling["house"])), chatmethod,playerLanguageID);
 	end
 end
 
@@ -467,7 +489,7 @@ function WanderersGambling_OnClickROLL()
 	if (totalrolls > 0 and AcceptRolls == "true") then
 		if table.getn(WanderersGambling.strings) ~= 0 then
 			WanderersGambling_List();
-		end	
+		end
 		return;
 	end
 	if (totalrolls >1) then
@@ -509,7 +531,7 @@ function WanderersGambling_OnClickLASTCALL()
 	WanderersGambling_ROLL_Button:Enable();
 end
 
-function WanderersGambling_OnClickACCEPTONES() 
+function WanderersGambling_OnClickACCEPTONES()
 	if WanderersGambling_EditBox:GetText() ~= "" and WanderersGambling_EditBox:GetText() ~= "1" then
 		WanderersGambling_Reset();
 		WanderersGambling_ROLL_Button:Disable();
@@ -517,16 +539,23 @@ function WanderersGambling_OnClickACCEPTONES()
 		AcceptOnes = "true";
 		AcceptLoserAmount = "false";
 		local fakeroll = "";
-		local withdrawComment = "with much shame!"
+		local withdrawComment = " with much shame!"
 		local amount = tonumber(WanderersGambling_EditBox:GetText())
 		local highRoller = ""
 		local sRandomComment = "Welcome to"
 		local sRandomCommentEnd = ""
-		if amount % 2 > 0 then withdrawComment = "how embarrassing!" sRandomComment = "Focus up for" sRandomCommentEnd = " A product from, Boomur & Sons!"	 end		
-		if amount > 99999 then highRoller = "Let's go High Rollers!" end
-		C_ChatInfo.SendChatMessage(format("%s%s%s%s", sRandomComment.." BronzeKnight's Gambling!"..sRandomCommentEnd.." Rolling for: ", BreakUpLargeNumbers(amount), "!"..highRoller.." Type 1 to join!  (-1 to withdraw, "..withdrawComment..")", fakeroll),chatmethod,playerLanguageID);
+		if
+			tonumber(amount) % 2 > 0 then withdrawComment = "how embarrassing!" sRandomComment = "Focus up for" sRandomCommentEnd = " A BoomCo production."
+		end
+		if
+			tonumber(amount) > 99999 then highRoller = " Let's go High Rollers! Yay!"
+		end
+		if
+			tonumber(amount) < 9999 then highRoller = " Chump change! Boo!"
+		end
+		C_ChatInfo.SendChatMessage(format("%s%s%s%s", sRandomComment.." Bronze's Gambling!"..sRandomCommentEnd.." Rolling for: ", BreakUpLargeNumbers(tonumber(amount)), "!"..highRoller.." Type 1 to join!  (-1 to withdraw, "..withdrawComment..")", fakeroll),chatmethod,playerLanguageID);
         WanderersGambling["lastroll"] = WanderersGambling_EditBox:GetText();
-		theMax = tonumber(WanderersGambling_EditBox:GetText()); 
+		theMax = tonumber(WanderersGambling_EditBox:GetText());
 		low = theMax+1;
 		tielow = theMax+1;
 		WanderersGambling_EditBox:ClearFocus();
@@ -538,7 +567,7 @@ function WanderersGambling_OnClickACCEPTONES()
 	end
 end
 
-function WanderersGambling_OnClickRollUser() 
+function WanderersGambling_OnClickRollUser()
 hash_SlashCmdList[rollCmd](WanderersGambling_EditBox:GetText())
 end
 
@@ -551,8 +580,8 @@ function WanderersGambling_OnClickRoll1()
 end
 
 WG_Settings = {
-	MinimapPos = 75 
-	
+	MinimapPos = 75
+
 }
 
 
@@ -567,11 +596,11 @@ function WG_MinimapButton_DraggingFrame_OnUpdate()
 	local xpos,ypos = GetCursorPosition()
 	local xmin,ymin = Minimap:GetLeft(), Minimap:GetBottom()
 
-	xpos = xmin-xpos/UIParent:GetScale()+70 
+	xpos = xmin-xpos/UIParent:GetScale()+70
 	ypos = ypos/UIParent:GetScale()-ymin-70
 
-	WG_Settings.MinimapPos = math.deg(math.atan2(ypos,xpos)) 
-	WG_MinimapButton_Reposition() 
+	WG_Settings.MinimapPos = math.deg(math.atan2(ypos,xpos))
+	WG_MinimapButton_Reposition()
 end
 
 
@@ -582,7 +611,7 @@ end
 function WanderersGambling_Report()
 	local goldowed = high - low
 	local houseCut = 0
-	if (WanderersGambling["isHouseCut"] == 1) then 
+	if (WanderersGambling["isHouseCut"] == 1) then
 		houseCut = floor(goldowed * WanderersGambling["guildCutPercentage"])
 		goldowed = goldowed - houseCut
 		WanderersGambling["house"] = (WanderersGambling["house"] or 0) + houseCut;
@@ -595,20 +624,20 @@ function WanderersGambling_Report()
 		if (WanderersGambling["isHouseCut"] == 1) then
 			string3 = strjoin(" ", "", lowname, "owes", highname, BreakUpLargeNumbers(goldowed),"gold and",  BreakUpLargeNumbers(houseCut),"to the guildbank.")
 		end
-		
+
 		local final = {highname, lowname, goldowed, houseCut};
 		local index = 0;
-		
+
 		if (not WanderersGambling["stats"][WanderersGambling["UUID"]]) then
 			WanderersGambling["stats"][WanderersGambling["UUID"]] = { }
 		end
-		
+
 		table.insert(WanderersGambling["stats"][WanderersGambling["UUID"]], final); --won, lost, owed
-	
+
 		C_ChatInfo.SendChatMessage(string3,chatmethod,playerLanguageID);
-		
+
 		if (WanderersGambling["loser"] == 1) then
-			C_ChatInfo.SendChatMessage(string.format("%s can now set the next gambling amount by saying !amount x", lowname), chatmethod);
+			C_ChatInfo.SendChatMessage(string.format("%s can now set the next gambling amount by saying !amount x", lowname), chatmethod, playerLanguageID);
 			AcceptLoserAmount = lowname;
 		end
 	else
@@ -642,7 +671,7 @@ function WanderersGambling_Tiebreaker()
 			tiehigh = 0;
 			WanderersGambling.strings = WanderersGambling.lowtie;
 			WanderersGambling.lowtie = {};
-			WanderersGambling_OnClickROLL();			
+			WanderersGambling_OnClickROLL();
 		end
 		if table.getn(WanderersGambling.hightie) > 0  and table.getn(WanderersGambling.strings) == 0 then
 			lowbreak = 0;
@@ -690,7 +719,7 @@ function WanderersGambling_ParseRoll(temp2)
 						end
 					end
 					WanderersGambling.hightie = {};
-			
+
 				end
 				if (roll == low) then
 					if table.getn(WanderersGambling.lowtie) == 0 then
@@ -698,7 +727,7 @@ function WanderersGambling_ParseRoll(temp2)
 					end
 					WanderersGambling_AddTie(player, WanderersGambling.lowtie);
 				end
-				if (roll<low) then 
+				if (roll<low) then
 					lowname = player
 					lowplayername = player
 					low = roll
@@ -707,23 +736,23 @@ function WanderersGambling_ParseRoll(temp2)
 							C_ChatInfo.SendChatMessage(string.format("You have the LOWEST roll so far: %s and you might owe %s %sg ", roll, highplayername, (high - low)),"WHISPER",playerLanguageID,player);
 						end
 					end
-					WanderersGambling.lowtie = {};				
-			
+					WanderersGambling.lowtie = {};
+
 				end
 			else
 				if (lowbreak == 1) then
 					if (roll == tielow) then
-						
+
 						if table.getn(WanderersGambling.lowtie) == 0 then
 							WanderersGambling_AddTie(lowname, WanderersGambling.lowtie);
 						end
 						WanderersGambling_AddTie(player, WanderersGambling.lowtie);
 					end
-					if (roll<tielow) then 
+					if (roll<tielow) then
 						lowname = player
 						tielow = roll;
-						WanderersGambling.lowtie = {};				
-		
+						WanderersGambling.lowtie = {};
+
 					end
 				end
 				if (highbreak == 1) then
@@ -737,7 +766,7 @@ function WanderersGambling_ParseRoll(temp2)
 						highname = player
 						tiehigh = roll;
 						WanderersGambling.hightie = {};
-			
+
 					end
 				end
 			end
@@ -755,7 +784,7 @@ function WanderersGambling_ParseRoll(temp2)
 					end
 				end
 			end
-		end	
+		end
 	end
 end
 
@@ -854,7 +883,7 @@ function WanderersGambling_RemoveBan(name)
 		Print("", "", "|cffffff00Error: No name provided.");
 	end
 end
-				
+
 function WanderersGambling_AddTie(name, tietable)
 	local charname, realmname = strsplit("-",name);
 	local insname = strlower(charname);
@@ -867,8 +896,8 @@ function WanderersGambling_AddTie(name, tietable)
         	end
 		if found == 0 then
 		    table.insert(tietable, insname)
-			tierolls = tierolls+1	
-			totalrolls = totalrolls+1		
+			tierolls = tierolls+1
+			totalrolls = totalrolls+1
 		end
 	end
 end
@@ -920,13 +949,13 @@ function WanderersGambling_Reset()
 		highplayername = "";
 		lowplayername = "";
 		WanderersGambling_ROLL_Button:Disable();
-		WanderersGambling_AcceptOnes_Button:Enable();		
+		WanderersGambling_AcceptOnes_Button:Enable();
 		WanderersGambling_LASTCALL_Button:Disable();
 		WanderersGambling_CHAT_Button:Enable();
 end
 
 function WanderersGambling_ResetCmd()
-	C_ChatInfo.SendChatMessage("BronzeKnight's Gambling game has been reset!", chatmethod)	
+	C_ChatInfo.SendChatMessage("Bronze's Gambling game has been reset!", chatmethod, playerLanguageID)
 end
 
 function WanderersGambling_EditBox_OnLoad()
